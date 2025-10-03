@@ -17,7 +17,7 @@ services:
     environment:
       DATABASE_URL: ${DATABASE_URL}
     ports:
-      - "8080:8080"
+      - "8233:8080"
     depends_on:
       - db
 

@@ -21,6 +21,21 @@ async function initDb() {
   }
 }
 
+async function waitForDb(retries = 10, delay = 2000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const client = await pool.connect();
+      client.release();
+      console.log("✅ Database is ready");
+      return;
+    } catch (err) {
+      console.log(`⏳ Waiting for DB... (${i + 1}/${retries})`);
+      await new Promise(res => setTimeout(res, delay));
+    }
+  }
+  throw new Error("❌ Database not reachable after retries");
+}
+
 app.get("/", async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM messages ORDER BY id ASC");
@@ -56,6 +71,7 @@ app.get("/", async (req, res) => {
 });
 
 app.listen(port, async () => {
+  await waitForDb();
   await initDb();
   console.log(`Frontend running at http://0.0.0.0:${port}`);
 });
